@@ -29,9 +29,11 @@ fi
 
 if [ $1 == "server" ]; then
     echo "INFO: server"
-    vllm serve $MODEL \
-	--disable-log-requests \
-	--no-enable-prefix-caching 
+    # Launch vLLM server with ROCm profiling and enforce eager execution for better profiling compatibility
+    rocprofv3 --hip-trace --hsa-trace -o vllm_server_trace.json vllm serve $MODEL \
+        --enforce-eager \
+        --disable-log-requests \
+        --no-enable-prefix-caching 
 fi
 
 
