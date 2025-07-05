@@ -16,8 +16,8 @@ export VLLM_GPU_MEMORY_UTILIZATION=0.95
 export VLLM_ATTENTION_BACKEND=triton
 export VLLM_DTYPE=float16
 export VLLM_ENABLE_CHUNKED_PREFILL=1
-export TORCH_NCCL_HIGH_PRIORITY=1
-export GPU_MAX_HW_QUEUES=2
+# export TORCH_NCCL_HIGH_PRIORITY=1
+# export GPU_MAX_HW_QUEUES=2
 
 LB_URL="https://siro1-amd-leaderboard.hf.space"
 
@@ -64,8 +64,8 @@ if [ $1 == "perf" ] || [ $1 == "all" ] || [ $1 == "submit" ]; then
 	sleep 1
     done
     echo "INFO: performance"
-    INPUT_LENGTH=1024
-    OUTPUT_LENGTH=256
+    INPUT_LENGTH=2048
+    OUTPUT_LENGTH=2048
     CONCURRENT=32
     date=$(date +'%b%d_%H_%M_%S')
     rpt=result_${date}.json
@@ -81,7 +81,9 @@ if [ $1 == "perf" ] || [ $1 == "all" ] || [ $1 == "submit" ]; then
         --save-result \
         --result-dir ./results/ \
         --result-filename $rpt \
-        --percentile-metrics ttft,tpot,itl,e2el
+        --percentile-metrics ttft,tpot,itl,e2el \
+        --seed 92100 \
+        --disable-log-requests
 
     PERF_OUTPUT=$(python show_results.py)
     echo "$PERF_OUTPUT"
@@ -112,8 +114,8 @@ if [ $1 == "profile" ] || [ $1 == "all" ] ; then
 	sleep 1
     done
     echo "INIFO: performance"
-    INPUT_LENGTH=128
-    OUTPUT_LENGTH=10
+    INPUT_LENGTH=2048
+    OUTPUT_LENGTH=2048
     CONCURRENT=16
     date=$(date +'%b%d_%H_%M_%S')
     rpt=result_${date}.json
@@ -130,7 +132,9 @@ if [ $1 == "profile" ] || [ $1 == "all" ] ; then
         --profile \
         --result-dir ./results_with_profile/ \
         --result-filename $rpt \
-        --percentile-metrics ttft,tpot,itl,e2el
+        --percentile-metrics ttft,tpot,itl,e2el \
+        --seed 92100 \
+        --disable-log-requests
 fi
 
 if [ "$1" == "profile_fused_moe" ]; then

@@ -77,3 +77,6 @@
 - If a directory does not exist, create it with `mkdir -p ...` before copying files.
 
 For more details on profiling with ROCm Compute Profiler, see the [official documentation](https://rocm.docs.amd.com/projects/rocprofiler-compute/en/latest/) and [GitHub repo](https://github.com/ROCm/rocprofiler-compute).
+
+- The benchmark and profiling scripts now use input and output lengths of 2048 tokens each (`INPUT_LENGTH=2048`, `OUTPUT_LENGTH=2048`) for higher quality evaluation.
+- The benchmark commands include `--seed 92100` for reproducibility and `--disable-log-requests` to reduce logging noise, following best practices for LLM benchmarking.
