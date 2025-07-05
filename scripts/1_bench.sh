@@ -9,6 +9,15 @@
 mkdir -p results
 export MODEL="amd/Mixtral-8x7B-Instruct-v0.1-FP8-KV"
 export VLLM_TORCH_PROFILER_DIR=./profile
+export PYTORCH_NO_HIP_MEMORY_CACHING=1
+export HSA_DISABLE_FRAGMENT_ALLOCATOR=1
+export VLLM_MAX_NUM_SEQS=32
+export VLLM_GPU_MEMORY_UTILIZATION=0.95
+export VLLM_ATTENTION_BACKEND=triton
+export VLLM_DTYPE=float16
+export VLLM_ENABLE_CHUNKED_PREFILL=1
+export TORCH_NCCL_HIGH_PRIORITY=1
+export GPU_MAX_HW_QUEUES=2
 
 LB_URL="https://siro1-amd-leaderboard.hf.space"
 
@@ -30,10 +39,22 @@ fi
 if [ $1 == "server" ]; then
     echo "INFO: server"
     # Launch vLLM server with ROCm profiling and enforce eager execution for better profiling compatibility
-    rocprofv3 --hip-trace --hsa-trace -o vllm_server_trace.json -- vllm serve $MODEL \
+    rocprofv3 --hip-trace --hsa-trace -o vllm_server_trace.json -- VLLM_USE_TRITON_FLASH_ATTN=0 vllm serve $MODEL \
         --enforce-eager \
         --disable-log-requests \
-        --no-enable-prefix-caching 
+        --no-enable-prefix-caching \
+        --trust-remote-code \
+        --tensor-parallel-size 1 \
+        --cuda-graph-sizes 64 \
+        --dtype float16 \
+        --gpu-memory-utilization 0.95 \
+        --max-num-seqs 1024 \
+        --attention-backend triton \
+        --enable-chunked-prefill=False \
+        --num-scheduler-steps 15 \
+        --max-seq-len-to-capture 16384 \
+        --port 8000 \
+        # Add any additional model-specific or optimization flags here
 fi
 
 
@@ -110,6 +131,32 @@ if [ $1 == "profile" ] || [ $1 == "all" ] ; then
         --result-dir ./results_with_profile/ \
         --result-filename $rpt \
         --percentile-metrics ttft,tpot,itl,e2el
+fi
+
+if [ "$1" == "profile_fused_moe" ]; then
+    echo "INFO: Profiling fused_moe_kernel with rocprofiler-compute"
+    # Ensure rocprofiler-compute is installed and available
+    if ! command -v rocprofiler-compute &> /dev/null; then
+        echo "ERROR: rocprofiler-compute not found. Please install it first."
+        exit 1
+    fi
+    # Run the profiler targeting the fused_moe_kernel
+    CUDA_VISIBLE_DEVICES=0 ROCPROFCOMPUTE_LOGLEVEL=debug rocprofiler-compute profile --name fused_moe_profile --device 0 --kernel fused_moe_kernel -- python /vllm-dev/benchmarks/benchmark_serving.py \
+        --model $MODEL \
+        --dataset-name random \
+        --random-input-len 128 \
+        --random-output-len 10 \
+        --num-prompts 32 \
+        --max-concurrency 16 \
+        --request-rate inf \
+        --ignore-eos \
+        --save-result \
+        --profile \
+        --result-dir ./results_with_profile/ \
+        --result-filename fused_moe_profile.json \
+        --percentile-metrics ttft,tpot,itl,e2el
+    echo "INFO: Profiling complete. Results are in workloads/fused_moe_profile/MI300/"
+    exit 0
 fi
 
 if [ $1 == "submit" ]; then

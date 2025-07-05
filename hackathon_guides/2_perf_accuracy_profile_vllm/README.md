@@ -176,3 +176,41 @@ And go to http://127.0.0.1:8050 on your laptop to see the profiling UI, for exam
 
 * [ROCm Systems Profiler](https://rocm.docs.amd.com/projects/rocprofiler-systems/en/latest/index.html): It is useful to profile complex workloads which involves multiple kernels, to get a global trace view. For vllm, it would be similar to pytorch profiler.
 * [ROCprof Compute Viewer](https://github.com/ROCm/rocprof-compute-viewer): Released ~2 months ago, it gives a more detailed profiling view at the kernel level than rocprof-compute, notably at the assembly level. [Documentation here](https://rocm.docs.amd.com/projects/rocprof-compute-viewer/en/latest/).
+
+# ROCm Compute Profiler: Kernel-Level Profiling
+
+To perform advanced profiling and analytics for AMD hardware, you can use the ROCm Compute Profiler ([rocprofiler-compute](https://github.com/ROCm/rocprofiler-compute)). This tool allows you to collect detailed performance metrics for specific GPU kernels, such as 'fused_moe_kernel'.
+
+## Installation
+
+Follow the official instructions at [rocprofiler-compute documentation](https://rocm.docs.amd.com/projects/rocprofiler-compute/en/latest/) or the [GitHub repo](https://github.com/ROCm/rocprofiler-compute).
+
+## Example: Profiling 'fused_moe_kernel'
+
+1. **Install the profiler (if not already installed):**
+   ```sh
+   apt update
+   apt install -y rocprofiler-compute
+   pip install -r /opt/rocm/libexec/rocprofiler-compute/requirements.txt
+   ```
+2. **Run the profiler targeting the specific kernel:**
+   ```sh
+   CUDA_VISIBLE_DEVICES=0 ROCPROFCOMPUTE_LOGLEVEL=debug rocprofiler-compute profile --name fused_moe_profile --device 0 --kernel fused_moe_kernel -- python your_script.py
+   ```
+   - Replace `your_script.py` with the script that triggers the kernel execution.
+   - The profile will be saved under `workloads/fused_moe_profile/MI300/`.
+3. **Analyze the results:**
+   ```sh
+   rocprofiler-compute analyze -p workloads/fused_moe_profile/MI300/
+   ```
+   - For GUI analysis:
+     ```sh
+     rocprofiler-compute analyze -p workloads/fused_moe_profile/MI300/ --gui
+     ```
+   - Forward the port if needed:
+     ```sh
+     ssh -L 127.0.0.1:8050:127.0.0.1:8050 root@YOUR_IP
+     # Then open http://127.0.0.1:8050 in your browser
+     ```
+
+For more details, see the [rocprofiler-compute GitHub](https://github.com/ROCm/rocprofiler-compute).

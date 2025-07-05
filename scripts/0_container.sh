@@ -38,9 +38,22 @@ docker run \
     -e SAFETENSORS_FAST_GPU=1 \
     -e VLLM_USE_V1=1 \
     -e VLLM_V1_USE_PREFILL_DECODE_ATTENTION=1 \
+    -e PYTORCH_NO_HIP_MEMORY_CACHING=1 \
+    -e HSA_DISABLE_FRAGMENT_ALLOCATOR=1 \
+    -e VLLM_MAX_NUM_SEQS=32 \
+    -e VLLM_GPU_MEMORY_UTILIZATION=0.95 \
+    -e VLLM_ATTENTION_BACKEND=triton \
+    -e VLLM_DTYPE=float16 \
+    -e VLLM_ENABLE_CHUNKED_PREFILL=1 \
+    -e TORCH_NCCL_HIGH_PRIORITY=1 \
+    -e GPU_MAX_HW_QUEUES=2 \
     -v "$PWD/.hf_cache/":/root/.cache/huggingface/hub/ \
     -v "$PWD/.vllm_cache/":/root/.cache/vllm/ \
     -v "$PWD":/workspace \
     -v ${PWD}/vllm:/vllm-dev \
     -w /workspace \
     $DOCKER_IMG 
+
+# Install ROCm Compute Profiler (rocprofiler-compute) and its Python requirements
+apt update && apt install -y rocprofiler-compute
+pip install -r /opt/rocm/libexec/rocprofiler-compute/requirements.txt
