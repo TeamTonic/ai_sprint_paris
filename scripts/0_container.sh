@@ -1,5 +1,5 @@
 CONTAINER_NAME="vllm-container"
-DOCKER_IMG="rocm/vllm-dev:nightly_0610_rc2_0610_rc2_20250605"
+DOCKER_IMG="rocm/vllm-dev:nightly"
 
 
 running_container=$(docker ps -q --filter "name=$CONTAINER_NAME")
@@ -47,6 +47,11 @@ docker run \
     -e VLLM_ENABLE_CHUNKED_PREFILL=1 \
     -e TORCH_NCCL_HIGH_PRIORITY=1 \
     -e GPU_MAX_HW_QUEUES=2 \
+    -e VLLM_ENGINE_USE_PARALLEL_SAMPLING=1 \
+    -e VLLM_ENABLE_FUSED_MOE=1 \
+    -e VLLM_MOE_TOPK=2 \
+    -e VLLM_MOE_CAPACITY_FACTOR=2.0 \
+    -e VLLM_ENABLE_LOG_STATS=0 \
     -v "$PWD/.hf_cache/":/root/.cache/huggingface/hub/ \
     -v "$PWD/.vllm_cache/":/root/.cache/vllm/ \
     -v "$PWD":/workspace \
