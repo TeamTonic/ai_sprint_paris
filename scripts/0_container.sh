@@ -58,7 +58,3 @@ docker run \
     -v ${PWD}/vllm:/vllm-dev \
     -w /workspace \
     $DOCKER_IMG 
-
-# Install ROCm Compute Profiler (rocprofiler-compute) and its Python requirements
-apt update && apt install -y rocprofiler-compute
-pip install -r /opt/rocm/libexec/rocprofiler-compute/requirements.txt
