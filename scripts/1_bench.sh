@@ -94,8 +94,7 @@ if [ $1 == "perf" ] || [ $1 == "all" ] || [ $1 == "submit" ]; then
         --result-dir ./results/ \
         --result-filename $rpt \
         --percentile-metrics ttft,tpot,itl,e2el \
-        --seed 92100 \
-        --disable-log-requests
+        --seed 92100
 
     PERF_OUTPUT=$(python show_results.py)
     echo "$PERF_OUTPUT"
@@ -145,8 +144,7 @@ if [ $1 == "profile" ] || [ $1 == "all" ] ; then
         --result-dir ./results_with_profile/ \
         --result-filename $rpt \
         --percentile-metrics ttft,tpot,itl,e2el \
-        --seed 92100 \
-        --disable-log-requests
+        --seed 92100
 fi
 
 if [ "$1" == "profile_fused_moe" ]; then
