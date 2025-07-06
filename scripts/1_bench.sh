@@ -63,9 +63,8 @@ if [ $1 == "server" ]; then
         --max-num-seqs 2048 \
         --num-scheduler-steps 15 \
         --max-seq-len-to-capture 8192 \
-        --port 8000 \
-        --no-enable-chunked-prefill \
-        --swap-space 0
+        --swap-space 0 \
+        --port 8000
 fi
 
 
