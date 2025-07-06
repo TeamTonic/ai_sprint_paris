@@ -50,25 +50,21 @@ if [ $1 == "server" ]; then
     # Unset VLLM_USE_V1 and set ROCm backend for MI300X compatibility
     unset VLLM_USE_V1
     export VLLM_ATTENTION_BACKEND=rocm
-    # Launch vLLM server with ROCm profiling and enforce eager execution for better profiling compatibility
-    # rocprofv3 --hip-trace --hsa-trace -o vllm_server_trace.json -- vllm serve $MODEL \
+    # Optimization: maximize concurrency, memory, and batch size
     vllm serve $MODEL \
         --enforce-eager \
         --disable-log-requests \
         --no-enable-prefix-caching \
         --trust-remote-code \
         --tensor-parallel-size 1 \
-        --cuda-graph-sizes 128 \
+        --cuda-graph-sizes 256 \
         --dtype float16 \
-        --gpu-memory-utilization 0.95 \
+        --gpu-memory-utilization 0.98 \
         --max-num-seqs 1024 \
-        --no-enable-chunked-prefill \
-        --num-scheduler-steps 15 \
+        --num-scheduler-steps 20 \
         --max-seq-len-to-capture 8192 \
         --port 8000 \
-        --no-enable-chunked-prefill
-
-        # Add any additional model-specific or optimization flags here
+        --enable-chunked-prefill
 fi
 
 
@@ -78,9 +74,10 @@ if [ $1 == "perf" ] || [ $1 == "all" ] || [ $1 == "submit" ]; then
 	sleep 1
     done
     echo "INFO: performance"
+    # Optimization: maximize concurrency and batch size
     INPUT_LENGTH=128
     OUTPUT_LENGTH=10
-    CONCURRENT=16
+    CONCURRENT=32
     date=$(date +'%b%d_%H_%M_%S')
     rpt=result_${date}.json
     python /vllm-dev/benchmarks/benchmark_serving.py \

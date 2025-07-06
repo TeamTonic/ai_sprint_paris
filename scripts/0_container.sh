@@ -19,8 +19,11 @@ echo "$PWD/.vllm_cache -> /root/.cache/vllm/"
 echo "$PWD -> /workspace"
 echo "$PWD/vllm -> /vllm-dev"
 
-# PYTORCH_ROCM_ARCH="gfx942" is useful to later restrict kernel compilation only for CDNA3 architecture (MI300),
-# speeding up compilation time.
+# Optimization: Set environment variables for maximum throughput and e2e
+# Remove conflicting or redundant settings, and set optimal values
+# Use ROCm backend for attention, maximize concurrency, and memory utilization
+# Add comments for clarity
+
 docker run \
     --rm \
     -it \
@@ -36,21 +39,19 @@ docker run \
     -e PYTORCH_ROCM_ARCH="gfx942" \
     -e HSA_NO_SCRATCH_RECLAIM=1 \
     -e SAFETENSORS_FAST_GPU=1 \
-    -e VLLM_USE_V1=1 \
-    -e VLLM_V1_USE_PREFILL_DECODE_ATTENTION=1 \
     -e PYTORCH_NO_HIP_MEMORY_CACHING=1 \
     -e HSA_DISABLE_FRAGMENT_ALLOCATOR=1 \
-    -e VLLM_MAX_NUM_SEQS=32 \
-    -e VLLM_GPU_MEMORY_UTILIZATION=0.95 \
-    -e VLLM_ATTENTION_BACKEND=triton \
+    -e VLLM_MAX_NUM_SEQS=1024 \
+    -e VLLM_GPU_MEMORY_UTILIZATION=0.98 \
+    -e VLLM_ATTENTION_BACKEND=rocm \
     -e VLLM_DTYPE=float16 \
     -e VLLM_ENABLE_CHUNKED_PREFILL=1 \
     -e TORCH_NCCL_HIGH_PRIORITY=1 \
-    -e GPU_MAX_HW_QUEUES=2 \
+    -e GPU_MAX_HW_QUEUES=4 \
     -e VLLM_ENGINE_USE_PARALLEL_SAMPLING=1 \
     -e VLLM_ENABLE_FUSED_MOE=1 \
     -e VLLM_ROCM_USE_SKINNY_GEMM=1 \
-    -e VLLM_MOE_TOPK=1 \
+    -e VLLM_MOE_TOPK=2 \
     -e VLLM_MOE_CAPACITY_FACTOR=2.0 \
     -e VLLM_ENABLE_LOG_STATS=0 \
     -v "$PWD/.hf_cache/":/root/.cache/huggingface/hub/ \
