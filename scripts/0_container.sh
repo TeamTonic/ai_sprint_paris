@@ -49,7 +49,8 @@ docker run \
     -e GPU_MAX_HW_QUEUES=2 \
     -e VLLM_ENGINE_USE_PARALLEL_SAMPLING=1 \
     -e VLLM_ENABLE_FUSED_MOE=1 \
-    -e VLLM_MOE_TOPK=2 \
+    -e VLLM_ROCM_USE_SKINNY_GEMM=1 \
+    -e VLLM_MOE_TOPK=1 \
     -e VLLM_MOE_CAPACITY_FACTOR=2.0 \
     -e VLLM_ENABLE_LOG_STATS=0 \
     -v "$PWD/.hf_cache/":/root/.cache/huggingface/hub/ \

@@ -24,6 +24,7 @@ export VLLM_MOE_CAPACITY_FACTOR=2.0
 export VLLM_ENABLE_LOG_STATS=0
 export VLLM_USE_TRITON_FLASH_ATTN=0
 
+
 # export TORCH_NCCL_HIGH_PRIORITY=1
 # export GPU_MAX_HW_QUEUES=2
 
@@ -50,7 +51,8 @@ if [ $1 == "server" ]; then
     unset VLLM_USE_V1
     export VLLM_ATTENTION_BACKEND=rocm
     # Launch vLLM server with ROCm profiling and enforce eager execution for better profiling compatibility
-    rocprofv3 --hip-trace --hsa-trace -o vllm_server_trace.json -- vllm serve $MODEL \
+    # rocprofv3 --hip-trace --hsa-trace -o 
+    vllm_server_trace.json -- vllm serve $MODEL \
         --enforce-eager \
         --disable-log-requests \
         --no-enable-prefix-caching \
