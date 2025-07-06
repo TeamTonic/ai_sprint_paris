@@ -76,9 +76,9 @@ if [ $1 == "perf" ] || [ $1 == "all" ] || [ $1 == "submit" ]; then
 	sleep 1
     done
     echo "INFO: performance"
-    INPUT_LENGTH=2048
-    OUTPUT_LENGTH=2048
-    CONCURRENT=32
+    INPUT_LENGTH=128
+    OUTPUT_LENGTH=10
+    CONCURRENT=16
     date=$(date +'%b%d_%H_%M_%S')
     rpt=result_${date}.json
     python /vllm-dev/benchmarks/benchmark_serving.py \
