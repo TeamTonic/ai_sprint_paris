@@ -64,7 +64,7 @@ if [ $1 == "server" ]; then
         --max-num-seqs 1024 \
         --no-enable-chunked-prefill \
         --num-scheduler-steps 15 \
-        --max-seq-len-to-capture 10 \
+        --max-seq-len-to-capture 8192 \
         --port 8000 \
         --no-enable-chunked-prefill
 
