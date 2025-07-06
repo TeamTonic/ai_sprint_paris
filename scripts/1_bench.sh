@@ -20,7 +20,7 @@ export VLLM_ENABLE_CHUNKED_PREFILL=1
 export VLLM_ENGINE_USE_PARALLEL_SAMPLING=1
 export VLLM_ENABLE_FUSED_MOE=1
 export VLLM_MOE_TOPK=2
-export VLLM_MOE_CAPACITY_FACTOR=1.0
+export VLLM_MOE_CAPACITY_FACTOR=4.0
 export VLLM_ENABLE_LOG_STATS=0
 export VLLM_USE_TRITON_FLASH_ATTN=0
 
@@ -57,14 +57,15 @@ if [ $1 == "server" ]; then
         --no-enable-prefix-caching \
         --trust-remote-code \
         --tensor-parallel-size 1 \
-        --cuda-graph-sizes 256 \
+        --cuda-graph-sizes 512 \
         --dtype float16 \
-        --gpu-memory-utilization 0.98 \
-        --max-num-seqs 1024 \
-        --num-scheduler-steps 20 \
+        --gpu-memory-utilization 0.99 \
+        --max-num-seqs 2048 \
+        --num-scheduler-steps 15 \
         --max-seq-len-to-capture 8192 \
         --port 8000 \
-        --enable-chunked-prefill
+        --enable-chunked-prefill \
+        --swap-space 0
 fi
 
 
@@ -77,7 +78,7 @@ if [ $1 == "perf" ] || [ $1 == "all" ] || [ $1 == "submit" ]; then
     # Optimization: maximize concurrency and batch size
     INPUT_LENGTH=128
     OUTPUT_LENGTH=10
-    CONCURRENT=32
+    CONCURRENT=16
     date=$(date +'%b%d_%H_%M_%S')
     rpt=result_${date}.json
     python /vllm-dev/benchmarks/benchmark_serving.py \
