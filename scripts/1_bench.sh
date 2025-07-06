@@ -20,7 +20,7 @@ export VLLM_ENABLE_CHUNKED_PREFILL=1
 export VLLM_ENGINE_USE_PARALLEL_SAMPLING=1
 export VLLM_ENABLE_FUSED_MOE=1
 export VLLM_MOE_TOPK=2
-export VLLM_MOE_CAPACITY_FACTOR=2.0
+export VLLM_MOE_CAPACITY_FACTOR=1.0
 export VLLM_ENABLE_LOG_STATS=0
 export VLLM_USE_TRITON_FLASH_ATTN=0
 
@@ -51,14 +51,14 @@ if [ $1 == "server" ]; then
     unset VLLM_USE_V1
     export VLLM_ATTENTION_BACKEND=rocm
     # Launch vLLM server with ROCm profiling and enforce eager execution for better profiling compatibility
-    # rocprofv3 --hip-trace --hsa-trace -o 
-    vllm_server_trace.json -- vllm serve $MODEL \
+    # rocprofv3 --hip-trace --hsa-trace -o vllm_server_trace.json -- vllm serve $MODEL \
+    vllm serve $MODEL \
         --enforce-eager \
         --disable-log-requests \
         --no-enable-prefix-caching \
         --trust-remote-code \
         --tensor-parallel-size 1 \
-        --cuda-graph-sizes 64 \
+        --cuda-graph-sizes 128 \
         --dtype float16 \
         --gpu-memory-utilization 0.95 \
         --max-num-seqs 1024 \
