@@ -64,7 +64,7 @@ if [ $1 == "server" ]; then
         --num-scheduler-steps 15 \
         --max-seq-len-to-capture 8192 \
         --port 8000 \
-        --enable-chunked-prefill \
+        --no-enable-chunked-prefill \
         --swap-space 0
 fi
 
