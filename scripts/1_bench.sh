@@ -13,7 +13,7 @@ export PYTORCH_NO_HIP_MEMORY_CACHING=1
 export HSA_DISABLE_FRAGMENT_ALLOCATOR=1
 export VLLM_MAX_NUM_SEQS=32
 export VLLM_GPU_MEMORY_UTILIZATION=0.95
-export VLLM_ATTENTION_BACKEND=triton
+export VLLM_ATTENTION_BACKEND=rocm
 export ROCM_USE_FLASH_ATTN_V2_TRITON=True
 export VLLM_DTYPE=float16
 export VLLM_ENABLE_CHUNKED_PREFILL=1
@@ -46,7 +46,9 @@ fi
 
 if [ $1 == "server" ]; then
     echo "INFO: server"
-    # Set environment variable correctly
+    # Unset VLLM_USE_V1 and set ROCm backend for MI300X compatibility
+    unset VLLM_USE_V1
+    export VLLM_ATTENTION_BACKEND=rocm
     # Launch vLLM server with ROCm profiling and enforce eager execution for better profiling compatibility
     rocprofv3 --hip-trace --hsa-trace -o vllm_server_trace.json -- vllm serve $MODEL \
         --enforce-eager \
@@ -58,11 +60,12 @@ if [ $1 == "server" ]; then
         --dtype float16 \
         --gpu-memory-utilization 0.95 \
         --max-num-seqs 1024 \
-    #   --attention-backend triton \
         --no-enable-chunked-prefill \
         --num-scheduler-steps 15 \
         --max-seq-len-to-capture 16384 \
         --port 8000 \
+        --no-enable-chunked-prefill
+
         # Add any additional model-specific or optimization flags here
 fi
 
