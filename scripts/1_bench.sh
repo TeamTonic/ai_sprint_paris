@@ -59,7 +59,7 @@ if [ $1 == "server" ]; then
         --gpu-memory-utilization 0.95 \
         --max-num-seqs 1024 \
         --attention-backend triton \
-        --enable-chunked-prefill=False \
+        --no-enable-chunked-prefill \
         --num-scheduler-steps 15 \
         --max-seq-len-to-capture 16384 \
         --port 8000 \
